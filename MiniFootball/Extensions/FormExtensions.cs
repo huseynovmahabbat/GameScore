@@ -19,6 +19,15 @@ namespace MiniFootball.Extensions
              bool isValid =  Validator.TryValidateObject(obj, context, results, true);
             return Tuple.Create(isValid, results);
         }
+        public static byte CalculateAge(this Form form,DateTime DateOfBirth)
+        {
+            DateTime today = DateTime.Today;
+            
+            byte age = Convert.ToByte(today.Year - DateOfBirth.Year);
+            
+            if (DateOfBirth > today.AddYears(-age)) age--;
+            return age;
+        }
         
         
     }
