@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace MiniFootball.Models
 {
-   public  class Role:Entity
+    public class Skill:Entity
     {
         [Required]
-        [StringLength(maximumLength:30,MinimumLength =4)]
         public string Name { get; set; }
+        public Player Player { get; set; }
+        public int? PlayerId { get; set; }
     }
 }

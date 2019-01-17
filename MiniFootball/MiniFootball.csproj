@@ -92,15 +92,25 @@
       <DependentUpon>Register.cs</DependentUpon>
     </Compile>
     <Compile Include="Infrastructures\Session.cs" />
-    <Compile Include="Migrations\201901161257297_Initial.cs" />
-    <Compile Include="Migrations\201901161257297_Initial.Designer.cs">
-      <DependentUpon>201901161257297_Initial.cs</DependentUpon>
+    <Compile Include="Migrations\201901171058225_Inital.cs" />
+    <Compile Include="Migrations\201901171058225_Inital.Designer.cs">
+      <DependentUpon>201901171058225_Inital.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201901171100599_AdminModelAndPlayerModelChanged.cs" />
+    <Compile Include="Migrations\201901171100599_AdminModelAndPlayerModelChanged.Designer.cs">
+      <DependentUpon>201901171100599_AdminModelAndPlayerModelChanged.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201901171103495_RequiredAttributeAddedAllModel.cs" />
+    <Compile Include="Migrations\201901171103495_RequiredAttributeAddedAllModel.Designer.cs">
+      <DependentUpon>201901171103495_RequiredAttributeAddedAllModel.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Administration.cs" />
     <Compile Include="Models\Entity.cs" />
     <Compile Include="Models\Role.cs" />
+    <Compile Include="Models\Skill.cs" />
     <Compile Include="Models\Team.cs" />
-    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\Player.cs" />
     <Compile Include="Models\ViewModels\LoginModel.cs" />
     <Compile Include="Models\ViewModels\PlayerModel.cs" />
     <Compile Include="Models\ViewModels\RegisterModel.cs" />
@@ -121,8 +131,14 @@
     <EmbeddedResource Include="Forms\Register.resx">
       <DependentUpon>Register.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201901161257297_Initial.resx">
-      <DependentUpon>201901161257297_Initial.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201901171058225_Inital.resx">
+      <DependentUpon>201901171058225_Inital.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201901171100599_AdminModelAndPlayerModelChanged.resx">
+      <DependentUpon>201901171100599_AdminModelAndPlayerModelChanged.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201901171103495_RequiredAttributeAddedAllModel.resx">
+      <DependentUpon>201901171103495_RequiredAttributeAddedAllModel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

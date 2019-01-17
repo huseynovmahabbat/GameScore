@@ -10,17 +10,21 @@ namespace MiniFootball.Extensions
 {
    public static class DbsetExtensions
     {
-        public async static Task<User> GetUserByEmailAsync(this DbSet<User> users,string Email)
+        public async static Task<Player> GetUserByEmailAsync(this DbSet<Player> players,string Email)
         {
-            return await users.Where(x => x.Email == Email).FirstOrDefaultAsync();
+            return await players.Where(x => x.Email == Email).FirstOrDefaultAsync();
         }
-        public async static Task<User> GetUserByIdAsync(this DbSet<User> users, int Id)
+        public async static Task<Player> GetUserByIdAsync(this DbSet<Player> users, int Id)
         {
             return await users.Where(x => x.Id == Id).FirstOrDefaultAsync();
         }
-        public async static Task<List<User>> GetFreePlayersAsync(this DbSet<User> users)
+        public async static Task<List<Player>> GetFreePlayersAsync(this DbSet<Player> players)
         {
-            return await users.Where(x => x.RoleId != 1 && x.TeamId==null).ToListAsync();
+            return await players.Where(x => x.RoleId != 1 && x.TeamId==null).ToListAsync();
+        }
+        public static List<Skill> GetPlayerSkills(this DbSet<Player> players,int PlayerId)
+        {
+             return players.Where(x => x.Id == PlayerId).Select(x => x.Skills) as List<Skill>;
         }
     }
 }

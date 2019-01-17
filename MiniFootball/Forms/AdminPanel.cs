@@ -20,8 +20,9 @@ namespace MiniFootball.Forms
     public partial class AdminPanel : Form
     {
         GameDbContext db = null;
-        List<User> freePlayers = null;
+        List<Player> freePlayers = null;
         List<PlayerModel> playerModels = new List<PlayerModel>();
+        List<int> selectedPlayersId = new List<int>();
         public AdminPanel()
         {
             InitializeComponent();
@@ -32,15 +33,11 @@ namespace MiniFootball.Forms
             try
             {
                 db = new GameDbContext();
-               
-freePlayers = await db.Users.GetFreePlayersAsync();
-               
-               
+               freePlayers = await db.Players.GetFreePlayersAsync();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-
             }
             finally
             {
@@ -49,30 +46,39 @@ freePlayers = await db.Users.GetFreePlayersAsync();
             }
             try
             {
-                foreach (User player in freePlayers)
+                db = new GameDbContext();
+                foreach (Player player in freePlayers)
                 {
                     playerModels.Add(new PlayerModel
                     {
-                        Email = player.Email,
                         Id = player.Id,
                         FullName = player.Name + " " + player.Surname,
+                        Position = player.Postion,
                         Age = this.CalculateAge(player.BirthDate)
                     });
                 }
 
-                    CreatePlayerControl(playerModels);
-                    Session.SetValue("PlayerCount", 10);
-                
-               
-               
+                foreach (PlayerModel model in playerModels)
+                {
+                   
+                        model.Skills = db.Players.GetPlayerSkills(model.Id);
+                };
+
+                 CreatePlayerControl(playerModels,0,3);
+                 Session.SetValue("PlayerCount", 3);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
                 
             }
+            finally
+            {
+                if (db != null)
+                    db.Dispose();
+            }
         }
-
+        //Load Photo From Computer
         private void btn_loadphoto_Click(object sender, EventArgs e)
         {
             DialogResult result = openPhotoDialog.ShowDialog();
@@ -91,21 +97,34 @@ freePlayers = await db.Users.GetFreePlayersAsync();
                 DbContextTransaction transaction = db.Database.BeginTransaction();
                 try
                 {
-                    db.Teams.Add(new Team
+                    Team team = new Team
                     {
                         EstablishmentDate = dtp_estabdate.Value,
                         Name = txbx_name.Text,
                         Logo = (byte[])new ImageConverter().ConvertTo(pictureBox1.Image, typeof(byte[]))
-                    });
+                    };
+                    db.Teams.Add(team);
                     await db.SaveChangesAsync();
+                    if (selectedPlayersId.Count >= 11)
+                    {
+                        foreach (int item in selectedPlayersId)
+                        {
+                            Player selectedPlayer = await db.Players.GetUserByIdAsync(item);
+                            selectedPlayer.Id = team.Id;
+                        }
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                        MessageBox.Show("You must select 11 players");
+                  
                     
+                    transaction.Commit();
                 }
                 catch (Exception)
                 {
-
-                    throw;
+                    transaction.Rollback();
+                   
                 }
-               
 
             }
             
@@ -117,46 +136,136 @@ freePlayers = await db.Users.GetFreePlayersAsync();
             
         }
 
-       private  void prevBtn_Click(object sender,EventArgs e)
+        private void prevBtn_Click(object sender, EventArgs e)
         {
-            if (Controls.Contains((Control)Activator.CreateInstance(typeof(PlayerControl))))
+            int count = (int)Session.GetValue("PlayerCount");
+            if (count-3 <= 0)
             {
-               
+                MessageBox.Show("You are on the first page.");
             }
+            
+            else
+            {
+                foreach (Control control in tbg_teamadd.Controls.OfType<GroupBox>())
+                {
+                    foreach (CheckBox item in control.Controls.OfType<CheckBox>())
+                    {
+                        if (item.Checked)
+                        {
+                            selectedPlayersId.Add((int)item.Tag);
+                        }
+                    }
+                    if ( control.Text== "Players")
+                        tbg_teamadd.Controls.Remove(control);
+                }
+
+                int skipCount = count - 6;
+                CreatePlayerControl(playerModels, skipCount, 3);
+                Session.SetValue("PlayerCount", skipCount + 3);
+                
+            }
+
         }
-        private void CreatePlayerControl(List<PlayerModel> models)
+        private void nextBtn_Click(object sender,EventArgs e)
         {
-            int controlY = 67;
-            int BtnY = 184;
-
-            foreach (PlayerModel player in models.Take(10))
+            
+            
+            int skipCount = (int)Session.GetValue("PlayerCount");
+            if (skipCount == playerModels.Count)
             {
-
-                PlayerControl playerControl = new PlayerControl();
-                playerControl.Location = new Point(449, controlY);
-                playerControl.txbx_age.Text = player.Age.ToString();
-                playerControl.txbx_email.Text = player.Email;
-                playerControl.txbx_fullname.Text = player.FullName;
-                Button nextBtn = new Button
-                {
-                    Text = "Next",
-                    Location = new Point(1035, BtnY),
-                    Size = new Size(125, 51)
-
-                };
-                Button prevBtn = new Button
-                {
-                    Text = "Prev",
-                    Location = new Point(883, BtnY),
-                    Size = new Size(125, 51)
-
-                };
-                tbg_teamadd.Controls.AddRange(new Control[] { playerControl, nextBtn, prevBtn });
-                controlY += 220;
-                BtnY += 220;
-
-
+                MessageBox.Show("Don't have players");
             }
+            else
+            {
+                foreach (Control control in tbg_teamadd.Controls.OfType<GroupBox>())
+                {
+                    foreach (PlayerControl item in control.Controls.OfType<PlayerControl>())
+                    {
+
+                        if (item.chb_selectplayer.Checked)
+                        {
+                            selectedPlayersId.Add((int)item.Tag);
+                        }
+                    }
+                    if (control.Text == "Players")
+                        tbg_teamadd.Controls.Remove(control);
+                }
+                CreatePlayerControl(playerModels, skipCount, 3);
+                Session.SetValue("PlayerCount", skipCount + 3);
+            }
+            
+        
+
         }
+
+        private void CreatePlayerControl(List<PlayerModel> models,int SkipCount,int Count)
+        {
+            int controlY = 35;
+            int BtnY = 133;
+            GroupBox grp_players = new GroupBox
+            {
+                Location = new Point(300, 18),
+                Size = new Size(550, 450),
+                Text = "Players"
+            };
+            if(SkipCount<=0)
+            {
+                foreach (PlayerModel player in models.Take(Count))
+                {
+
+                    PlayerControl playerControl = new PlayerControl();
+                    playerControl.Location = new Point(0, controlY);
+                    playerControl.txbx_age.Text = player.Age.ToString();
+                    playerControl.txbx_email.Text = player.Position;
+                    playerControl.txbx_fullname.Text = player.FullName;
+                    playerControl.chb_selectplayer.Tag = player.Id;
+                    grp_players.Controls.Add(playerControl);
+                    controlY += 100;
+                    BtnY += 70;
+
+
+                }
+            }
+            else
+            {
+                foreach (PlayerModel player in models.Skip(SkipCount).Take(Count))
+                {
+
+                    PlayerControl playerControl = new PlayerControl();
+                    playerControl.Location = new Point(0, controlY);
+                    playerControl.txbx_age.Text = player.Age.ToString();
+                    playerControl.txbx_email.Text = player.Position;
+                    playerControl.txbx_fullname.Text = player.FullName;
+                    grp_players.Controls.Add(playerControl);
+                    controlY += 100;
+                    BtnY += 70;
+
+
+                }
+            }
+           
+            Button nextBtn = new Button
+            {
+                Text = "Next",
+                Location = new Point(420, BtnY),
+                Size = new Size(125, 51)
+
+            };
+
+            Button prevBtn = new Button
+            {
+                Text = "Prev",
+                Location = new Point(295, BtnY),
+                Size = new Size(125, 51)
+
+            };
+            nextBtn.Click += nextBtn_Click;
+            prevBtn.Click += prevBtn_Click;
+
+            grp_players.Controls.AddRange(new Control[] {  nextBtn, prevBtn });
+            tbg_teamadd.Controls.Add(grp_players);
+        }
+
+       
     }
 }

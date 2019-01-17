@@ -30,9 +30,9 @@ namespace MiniFootball.Models.ViewModels
         public byte RoleId { get; set; }
 
 
-        public static implicit operator User(RegisterModel model)
+        public static implicit operator Player(RegisterModel model)
         {
-            return new User
+            return new Player
             {
                 Name = model.Name,
                 Surname = model.Surname,

@@ -8,13 +8,18 @@ namespace MiniFootball.Infrastructures
 {
    public static class Session
     {
+        static Session()
+        {
+            dictionary = new Dictionary<string, object>();
+        }
         private static Dictionary<string,object> dictionary { get; set; }
 
         public static void SetValue(string key,object obj)
         {
-            if (dictionary[key] != null)
+            bool findedObj = dictionary.TryGetValue(key, out object ob);
+            if ( findedObj)
             {
-                throw new Exception("There is object in Session");//Exception must create in future.
+                dictionary[key] = obj;
             }
             else
             {
@@ -24,7 +29,12 @@ namespace MiniFootball.Infrastructures
         }
         public static object GetValue(string key)
         {
-            return  dictionary.TryGetValue(key,out object obj);
+            if (dictionary.TryGetValue(key, out object obj))
+            {
+                return dictionary[key];
+            }
+            else
+                return null;
             
 
         }

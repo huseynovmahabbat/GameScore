@@ -33,7 +33,7 @@ namespace MiniFootball.Forms
             try
             {
                 db = new GameDbContext();
-                User findedUser =  await db.Users.GetUserByEmailAsync(model.Email);
+                Player findedUser =  await db.Players.GetUserByEmailAsync(model.Email);
                 if (findedUser != null)
                 {
                     Close();

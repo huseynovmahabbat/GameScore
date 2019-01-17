@@ -42,13 +42,13 @@ namespace MiniFootball.Forms
             {
                 try
                 {
-                    User user = model;
+                    Player user = model;
                     db = new GameDbContext();
-                    User findedUser = await db.Users.GetUserByEmailAsync(user.Email);
+                    Player findedUser = await db.Players.GetUserByEmailAsync(user.Email);
                     if (findedUser != null) MessageBox.Show("There is profile with this email");
                     else
                     {
-                        db.Users.Add(user);
+                        db.Players.Add(user);
                         await db.SaveChangesAsync();
                     }
                     
